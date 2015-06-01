@@ -10,6 +10,7 @@ using System.IO;
 
 namespace FreeChat
 {
+    //保存和获取用户名和工作组的类
     public partial class FormSetupUserInfo : Form
     {
         public FormSetupUserInfo()
@@ -17,6 +18,7 @@ namespace FreeChat
             InitializeComponent();
             try
             {
+                //定义一个文件流来存放用户信息
                 FileStream fsRead = new FileStream(@"UserInformation.txt", FileMode.Open, FileAccess.Read);
                 StreamReader sr = new StreamReader(fsRead);
                 string userInfo = sr.ReadLine();
@@ -29,6 +31,7 @@ namespace FreeChat
             catch
             {
                 FileStream fsWrite = new FileStream(@"UserInformation.txt",FileMode.Create,FileAccess.Write);
+                //获取登录计算机的用户名                              与当前用户关联的网络域名
                 string date = System.Environment.UserName + ":" +System.Environment.UserDomainName;
                 StreamWriter sw = new StreamWriter(fsWrite);
                 sw.Write(date);
@@ -43,6 +46,7 @@ namespace FreeChat
         {
             if (this.txtSetName.Text == "")
             {
+                //显示错误errorProvider
                 errorProvider1.SetError(txtSetName, "请输入用户名");
             }
             else if (this.txtSetGroup.Text == "")

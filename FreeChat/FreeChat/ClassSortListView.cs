@@ -30,11 +30,12 @@ namespace FreeChat
 
             //比较
             compareResult = ObjectCompare.Compare(listviewX.SubItems[ColumnToSort].Text, listviewY.SubItems[ColumnToSort].Text);
-
+            //升序
             if (OrderOfSort == SortOrder.Ascending)
             {
                 return compareResult;
             }
+                //降序
             else if (OrderOfSort == SortOrder.Descending)
             {
                 return (-compareResult);

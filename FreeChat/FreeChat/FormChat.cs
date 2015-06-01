@@ -16,10 +16,10 @@ namespace FreeChat
 {
     public partial class FormChat : Form
     {
-        private string destinationIP = string.Empty;
-        private string destinationName = string.Empty;
-        private string destinationID = string.Empty;
-        private string receiveMsg = string.Empty;
+        private string destinationIP = string.Empty;//目的ip
+        private string destinationName = string.Empty;//目的用户名
+        private string destinationID = string.Empty;//目的计算机名
+        private string receiveMsg = string.Empty;//收到的消息
         public string Cuser = string.Empty;
         public string CuserIP = string.Empty;
 
@@ -292,8 +292,8 @@ namespace FreeChat
             {
                 this.txtSMsg.Text = "输入消息不能为空...";
                 this.txtSMsg.BackColor = Color.OldLace;
-                this.isTextBoxNotEmpty = false;
-                this.txtSMsg.ReadOnly = true;
+                this.isTextBoxNotEmpty = false;//设置输入的消息不为空
+                this.txtSMsg.ReadOnly = true;//输入消息只读
             }
             if(isTextBoxNotEmpty)
             {

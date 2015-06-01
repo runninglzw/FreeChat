@@ -12,8 +12,9 @@ namespace FreeChat
 {
     class ClassStartUdpThread
     { 
-        private ListView lvDisplayUser;
-        private Label lbUserCount;
+       
+        private ListView lvDisplayUser;//listview显示在线列表
+        private Label lbUserCount;//label显示在线人数
 
         public ClassStartUdpThread(ListView lDisplayUser, Label lUserCount)
         {
@@ -22,9 +23,13 @@ namespace FreeChat
         }
 
         //在程序运行后保持监听2425端口，负责处理各种类型消息
+        //1.用户第一次登陆发送":USER:"消息，收到此类消息会将对方加入到自己的在线好友列表中
+        //2.接收到":USER:"消息后，向对方发送":REPY:"消息，让对方将自己加入好友列表中
+        //3.
         public void StartUdpThread()
         {
             UdpClient udpClient = new UdpClient(2425);
+            //绑定任意ip地址和一个端口号用来接收别人的信息
             IPEndPoint ipEndPoint = new IPEndPoint(IPAddress.Any, 0);
 
             while (true)
@@ -42,7 +47,9 @@ namespace FreeChat
                         try
                         {
                             string[] sBody = msgBody.Split(':');
+                            //创建一个新的ListViewItem用来插入ListView
                             ListViewItem lviUser = new ListViewItem();
+                            //ListViewItem:整个表格的一行。ListViewSubItem：表格中某个单元格。
                             ListViewItem.ListViewSubItem lviComputerName = new ListViewItem.ListViewSubItem();
                             ListViewItem.ListViewSubItem lviIP = new ListViewItem.ListViewSubItem();
                             ListViewItem.ListViewSubItem lvGroup = new ListViewItem.ListViewSubItem();
@@ -57,15 +64,19 @@ namespace FreeChat
                             lviUser.SubItems.Add(lvGroup);
 
                             bool flag = true;
+                            //遍历ListView
                             for (int i = 0; i < this.lvDisplayUser.Items.Count; i++)
                             {
+
                                 if (lviIP.Text == this.lvDisplayUser.Items[i].SubItems[2].Text)
                                 {
+                                    //如果ip地址相等（同一个计算机）而用户名不等：删除原来的，添加刚创建的
                                     if (lviUser.Text != this.lvDisplayUser.Items[i].SubItems[0].Text)
                                     {
                                         this.lvDisplayUser.Items[i].Remove();
                                         flag = true;
                                     }
+                                    //如果ip地址相等（同一个计算机）而用户名也相等，不必添加到列表中
                                     else
                                     {
                                         flag = false;
@@ -76,7 +87,7 @@ namespace FreeChat
                             {
                                 this.lvDisplayUser.Items.Add(lviUser);
                             }                
-
+                            //更新在线人数
                             lbUserCount.Text = "在线人数：  " + this.lvDisplayUser.Items.Count;
 
                             //回复消息
@@ -85,7 +96,7 @@ namespace FreeChat
                         }
                         catch(Exception ex)
                         {
-                            //MessageBox.Show(ex.Message);
+                            MessageBox.Show(ex.Message);
                         }
                         break;
 
@@ -151,6 +162,7 @@ namespace FreeChat
                             bool flag = true;
                             for (int i = 0; i < this.lvDisplayUser.Items.Count; i++)
                             {
+                                //如果已经有对方ip则不必添加
                                 if (lviIP.Text == this.lvDisplayUser.Items[i].SubItems[2].Text)
                                 {
                                     //if (lviUser.Text != this.lvDisplayUser.Items[i].SubItems[0].Text)
@@ -172,7 +184,7 @@ namespace FreeChat
                         }
                         catch(Exception ex)
                         {
-                            //MessageBox.Show(ex.Message);
+                            MessageBox.Show(ex.Message);
                         }
                         break;
 

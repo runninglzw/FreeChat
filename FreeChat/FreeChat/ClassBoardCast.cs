@@ -12,6 +12,7 @@ namespace FreeChat
     class ClassBoardCast
     {
         UdpClient bcUdpClient = new UdpClient();
+        //绑定一个ip地址和端口号用来给别人传输信息
         IPEndPoint bcIPEndPoint = new IPEndPoint(IPAddress.Parse("255.255.255.255"), 2425);
 
         public string localIP = string.Empty;
@@ -36,7 +37,7 @@ namespace FreeChat
             }
             catch(Exception ex)
             {
-                //MessageBox.Show(ex.Message);
+                MessageBox.Show(ex.Message);
             }
             
         }
@@ -46,15 +47,13 @@ namespace FreeChat
         {
             GetLocalIP();
             FormSetupUserInfo setUserInfo = new FormSetupUserInfo();
+            //发送的内容
             string computerInfo = ":USER:" + setUserInfo.txtSetName.Text.Trim() + ":" + System.Environment.UserName +
                 ":" + localIP+ ":" + setUserInfo.txtSetGroup.Text.Trim();
-
+            //转化为字节流
             byte[] buff = Encoding.Default.GetBytes(computerInfo);
-           // while (true)
-            //{
-                bcUdpClient.Send(buff, buff.Length, bcIPEndPoint);
-           //     Thread.Sleep(2000);
-            //}
+            //发送
+            bcUdpClient.Send(buff, buff.Length, bcIPEndPoint);
         }
 
         //用户退出时，发送消息至广播地址
@@ -67,12 +66,14 @@ namespace FreeChat
             bcUdpClient.Send(bufQuit, bufQuit.Length, bcIPEndPoint);
         }
 
-        //收到别人上线的通知时，回复对方，以便对方将自己加入在线用户列表
+        //收到别人上线的通知时，回复对方，以便对方将自己加入在线用户列表，参数为自己的ip地址
         public void BCReply(string ipReply)
         {
             GetLocalIP();
             IPEndPoint EPReply = new IPEndPoint (IPAddress.Parse(ipReply),2425);
+            //获取文件信息
             FormSetupUserInfo setUserInfo = new FormSetupUserInfo();
+            //回复的内容
             string computerInfo = ":REPY:" + setUserInfo.txtSetName.Text.Trim() + ":" + System.Environment.UserName +
                 ":" + localIP + ":" + setUserInfo.txtSetGroup.Text.Trim();
 

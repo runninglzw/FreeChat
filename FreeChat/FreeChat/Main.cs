@@ -15,9 +15,10 @@ namespace FreeChat
 {
     public partial class MainForm : Form
     {
+        //引入User32.dll（用户界面相关的应用程序接口），入口点为FindWindow方法
         [DllImport("User32.dll", EntryPoint = "FindWindow")]
         private static extern IntPtr FindWindow(string lpClassName, string lpWindowName);
-
+        //声明排序器
         private ClassSortListView lvwColumnSorter;
 
         private int isSearchNum = -1;
@@ -32,19 +33,20 @@ namespace FreeChat
 
             ImageList imageList = new ImageList();
             imageList.ImageSize = new Size(1, 15);
-
+            //当项在控件中显示小图标时使用
             this.lvFriend.SmallImageList = imageList;
         }
 
         private void MainForm_Load(object sender, EventArgs e)
         {   
             //设置当前时间
-            this.labDate.Text = DateTime.Now.ToString("yyyy年MM月dd日") + "    "+ DateTime.Now.ToString("dddd", new System.Globalization.CultureInfo("zh-cn"));
+            this.labDate.Text = DateTime.Now.ToString("yyyy年MM月dd日") + "    "+ DateTime.Now.ToString("dddd", new System.Globalization.CultureInfo("zh-cn"));//zh-cn表示显示中文
             this.NotifyFreeChat.Text = System.Environment.UserName;
 
-            //监听消息（广播和聊天）
+            //监听消息（广播和聊天）将lvFriend, lbUserCount作为参数传递，起到一个同步ListView和label的作用
             ClassStartUdpThread startUdpThread = new ClassStartUdpThread(lvFriend, lbUserCount);
             Thread tStartUdpThread = new Thread(new ThreadStart(startUdpThread.StartUdpThread));
+            //设置为后台线程
             tStartUdpThread.IsBackground = true;
             tStartUdpThread.Start();
 
@@ -65,7 +67,9 @@ namespace FreeChat
         //通知图标双击
         private void notifyIcon1_MouseDoubleClick(object sender, MouseEventArgs e)
         {
+            //在任务栏显示
             this.ShowInTaskbar = true;
+            //正常显示
             this.WindowState = FormWindowState.Normal;
             this.Visible = true;
         }
@@ -95,17 +99,21 @@ namespace FreeChat
         {
             //bool isFormexist;
             if (lvFriend.SelectedItems[0].Index != -1)
-            {                
+            {  
+                //获得选中的项
                 ListViewItem lvItem = lvFriend.SelectedItems[0];
                
                 string windowsName = "与 " + lvItem.SubItems[1].Text + " 对话中";
                 IntPtr handle = FindWindow(null, windowsName);
+                //如果找到窗口则该窗口获得焦点
                 if (handle != IntPtr.Zero)
                 {
                     Form frm = (Form)Form.FromHandle(handle);
                     frm.WindowState = FormWindowState.Normal;
+                    //设置窗口可见
                     frm.Activate();
                 }
+                    //没找到窗口则新创建一个聊天窗口
                 else
                 {
                     //ipSend为从列表中取出，要发送的对象的IP
@@ -152,6 +160,7 @@ namespace FreeChat
             this.lvFriend.Items.Clear();
             
             ClassBoardCast CUpdate = new ClassBoardCast();
+            //发送user:消息，自己发送如果其他用户没添加自己则在添加自己之后发送repy消息，这样两个用户都互相添加，相当于刷新
             CUpdate.BoardCast();
         }
         //主菜单点击关闭按钮时，窗口最小化，而不是退出
