@@ -11,6 +11,7 @@ using System.Runtime.InteropServices;
 
 namespace FreeChat
 {
+    //自定义的RichTextBox控件
     public class RtfRichTextBox : RichTextBox
     {
         [DllImport("gdiplus.dll")]

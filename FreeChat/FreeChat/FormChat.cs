@@ -20,8 +20,8 @@ namespace FreeChat
         private string destinationName = string.Empty;//目的用户名
         private string destinationID = string.Empty;//目的计算机名
         private string receiveMsg = string.Empty;//收到的消息
-        public string Cuser = string.Empty;
-        public string CuserIP = string.Empty;
+        public string Cuser = string.Empty;//自己的用户名
+        public string CuserIP = string.Empty;//自己的ip
 
         public string filePath = string.Empty;
         public Socket socketTCPListen;
@@ -213,7 +213,7 @@ namespace FreeChat
             this.txtSMsg.Focus();               
         }
 
-        //接收传递的消息
+        //接收传递的消息(处理SendMessage()消息)
         protected override void DefWndProc(ref Message m)
         {
             switch (m.Msg)
@@ -223,8 +223,8 @@ namespace FreeChat
                     Type mytype = mystr.GetType();
                     mystr = (COPYDATASTRUCT)m.GetLParam(mytype);
                     receiveMsg = mystr.lpData;
-
-                    displayMessage(receiveMsg);
+                    
+                    displayMessage(receiveMsg);//显示传过来的文件消息，并显示是否接受文件的控件
                     break;
                 default:
                     base.DefWndProc(ref m);
@@ -236,8 +236,10 @@ namespace FreeChat
         {
             try
             {
+                
                 if ( msg.Length>6 && msg.Substring(0, 6) == "【发送文件】")
                 {
+                    //在聊天窗口显示发送的内容
                     this.txtRMsg.AppendTextAsRtf(destinationName + "  " + DateTime.Now.ToLongTimeString() + "\r\n",
                         new Font(this.Font,FontStyle.Regular), RtfRichTextBox.RtfColor.Blue);
 
@@ -249,6 +251,7 @@ namespace FreeChat
                     this.txtRMsg.ScrollToCaret();
 
                     this.filePath = msg.Substring(6);
+                    //显示是否接受文件的控件
                     this.labFileInfo.Text = destinationName + " 向你发送文件";
                     this.labFileInfo.Visible = true;
                     this.linkLableAccept.Visible = true;
@@ -332,10 +335,11 @@ namespace FreeChat
                 Dlg.Filter = "所有文件(*.*)|*.*";
                 Dlg.CheckFileExists = true;
                 Dlg.InitialDirectory = "C:\\Documents and Settings\\" + System.Environment.UserName + "\\桌面\\";
-               
+               //如果点了Ok，发送文件
                 if (Dlg.ShowDialog() == DialogResult.OK)
                 {
                     FI = new FileInfo(Dlg.FileName);
+                    //发送":DATA:"消息
                     string sendMsg = ":DATA:" + Cuser + "|" + System.Environment.UserName + "|" +
                         CuserIP + "|" + Dlg.FileName + "|" + FI.Length + "|";
 
@@ -343,7 +347,7 @@ namespace FreeChat
 
                     ClassSendMsg cSendFileInfo = new ClassSendMsg (destinationIP,buff);
                     cSendFileInfo.SendMessage();
-
+                    //在聊天窗口中显示信息
                     this.txtRMsg.AppendTextAsRtf(Cuser + "  " + DateTime.Now.ToLongTimeString() + "\r\n",
                         new Font(this.Font, FontStyle.Regular), RtfRichTextBox.RtfColor.Green);
 
@@ -391,14 +395,15 @@ namespace FreeChat
                 string filename = realFileName[realFileName.Length - 1].ToString();
                 int len;
 
+
+                //发送接受文件信息
+                ClassSendMsg cReadyToReceive = new ClassSendMsg(destinationIP, buff);
+                cReadyToReceive.SendMessage();
                 //同意接收文件，发送同意请求，并打开TCP监听
                 TCPListen();
 
-                ClassSendMsg cReadyToReceive = new ClassSendMsg(destinationIP, buff);
-                cReadyToReceive.SendMessage();
-
                 socketReceiveFile = socketTCPListen.Accept();
-
+                //选择路径保存
                 SaveFileDialog SFD = new SaveFileDialog();
                 SFD.OverwritePrompt = true;
                 SFD.RestoreDirectory = true;
@@ -410,6 +415,7 @@ namespace FreeChat
                 {
                     if (SFD.ShowDialog() == DialogResult.OK)
                     {
+                        //将字节流写入到文件流的基本方法，先声明一个文件流，用写的方式打开，循环将接收到的字节流写入到文件流中
                         FileStream FS = new FileStream(SFD.FileName, FileMode.OpenOrCreate, FileAccess.Write);
                         FS.Write(Buff, 0, len);
                         while ((len = socketReceiveFile.Receive(Buff)) != 0)
@@ -423,11 +429,11 @@ namespace FreeChat
                         this.txtRMsg.ForeColor = Color.Black;
                     }
                 }
-
+                //返回保存成功消息
                 string sendMessageInfo = ":MESG:" + Cuser + "|" + System.Environment.UserName + "|" +
                     CuserIP + "|" + "【发送信息】文件已发送成功";
                 byte[] buffReply = Encoding.Default.GetBytes(sendMessageInfo);
-
+                //发送
                 ClassSendMsg cSendMsg = new ClassSendMsg(destinationIP, buffReply);
                 cSendMsg.SendMessage();
 
@@ -436,6 +442,7 @@ namespace FreeChat
 
                 this.linkLabelRefuse.Enabled = true;
                 this.linkLableAccept.Enabled = true;
+                //在将确认接收文件的控件设置为不可见
                 this.labFileInfo.Visible = false;
                 this.linkLabelRefuse.Visible = false;
                 this.linkLableAccept.Visible = false;

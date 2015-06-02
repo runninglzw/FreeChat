@@ -60,8 +60,9 @@ namespace FreeChat
                 cds.dwData = (IntPtr)100;
                 cds.lpData = msgDetail;
                 cds.cbData = len + 1;
-
+                //后台进程和UI进程间的通信（使用WM_COPYDATA），cds为承载数据的结构体
                 SendMessage(handle, WM_COPYDATA,0,ref cds);
+                //闪烁窗口
                 FlashWindow(handle, true);
             }
             else
